@@ -1,0 +1,267 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  name               String
+  email              String?             @unique
+  password           String?
+  emailVerified      DateTime?           @map("email_verified")
+  image              String?
+  role               String              @default("user")
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  currentStageNumber Int                 @default(1)
+  currentTopicId     String              @default("Intro to Expressions")
+  AIQuestions        AIQuestions[]
+  KnowledgeState     KnowledgeState[]
+  UserPreAssessment  UserPreAssessment[]
+  Account            Account[]
+  Session            Session[]
+
+  StudentSkillProgress StudentSkillProgress[]
+
+  QuestionResponse QuestionResponse[]
+
+  UserBKTParameters UserBKTParameters[]
+}
+
+model Account {
+  id                String   @id @default(dbgenerated("generate_nanoid()"))
+  userId            String   @map("user_id")
+  type              String?
+  provider          String
+  providerAccountId String   @map("provider_account_id")
+  token_type        String?
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  scope             String?
+  id_token          String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String?  @map("user_id")
+  sessionToken String   @unique @map("session_token")
+  accessToken  String?  @map("access_token")
+  expires      DateTime
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  user         User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model VerificationRequest {
+  id        String   @id @default(dbgenerated("generate_nanoid()"))
+  token     String   @unique
+  expires   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  email     String
+
+  @@unique([email, token])
+}
+
+model Skill {
+  id              String                 @id @default(dbgenerated("generate_nanoid()"))
+  name            String                 @unique
+  definition      String?
+  stageSkills     StageSkill[]
+  studentProgress StudentSkillProgress[]
+}
+
+model Topic {
+  id             String           @id @default(dbgenerated("generate_nanoid()"))
+  name           String           @unique
+  BKTParameters  BKTParameters[]
+  KnowledgeState KnowledgeState[]
+  stages         Stage[]
+
+}
+
+model Stage {
+  id                String              @id @default(dbgenerated("generate_nanoid()"))
+  number            Int
+  title             String              @unique
+  topicId           String
+  AIQuestions       AIQuestions[]
+  BKTParameters     BKTParameters[]
+  KnowledgeState    KnowledgeState[]
+  Question          Question[]
+  topic             Topic               @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  stageSkills       StageSkill[]
+  UserPreAssessment UserPreAssessment[]
+
+  QuestionPrompts QuestionPrompts[]
+
+  QuestionResponse QuestionResponse[]
+
+  UserBKTParameters UserBKTParameters[]
+}
+
+model StageSkill {
+  stageId String
+  skillId String
+  skill   Skill  @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  stage   Stage  @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  @@id([stageId, skillId])
+}
+
+model StudentSkillProgress {
+  id          String   @id @default(uuid())
+  studentId   String
+  skillId     String
+  mastery     Float    @default(0.0)
+  lastUpdated DateTime @updatedAt
+  skill       Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  user        User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, skillId])
+}
+
+model Question {
+  id           String         @id @default(dbgenerated("generate_nanoid()"))
+  question     String
+  options      String[]
+  answer       String
+  type         QuestionType
+  stageId      String
+  createdAt    DateTime       @default(now())
+  stage        Stage          @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  UserResponse UserResponse[]
+}
+
+model AIQuestions {
+  id        String   @id @default(dbgenerated("generate_nanoid()"))
+  questions Json[]
+  stageId   String
+  userId    String
+  createdAt DateTime @default(now())
+  stage     Stage    @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model QuestionPrompts {
+  id        String   @id @default(dbgenerated("generate_nanoid()"))
+  prompt   String
+  stageId   String
+  createdAt DateTime @default(now())
+  stage     Stage    @relation(fields: [stageId], references: [id], onDelete: Cascade)
+}
+
+model UserPreAssessment {
+  id        String         @id @default(dbgenerated("generate_nanoid()"))
+  userId    String
+  stageId   String
+  createdAt DateTime       @default(now())
+  stage     Stage          @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  user      User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  responses UserResponse[]
+}
+
+model QuestionResponse {
+  id                  String            @id @default(dbgenerated("generate_nanoid()"))
+  userId              String
+  stageId             String  
+  questionId          String
+  assessmentId         String?     @default("")
+  selectedOption      String
+  isCorrect           Boolean
+  skill               String[]
+  difficulty          String
+  priorP_L            Float
+  posteriorP_L        Float
+  timeSpent           Float
+  timestamp           DateTime          @default(now())
+
+  stage           Stage    @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+
+  @@index([userId])
+  @@index([stageId])
+}
+
+model UserResponse {
+  id                  String            @id @default(dbgenerated("generate_nanoid()"))
+  userPreAssessmentId String
+  questionId          String
+  selectedOption      String
+  isCorrect           Boolean
+  timestamp           DateTime          @default(now())
+  question            Question          @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  userPreAssessment   UserPreAssessment @relation(fields: [userPreAssessmentId], references: [id], onDelete: Cascade)
+}
+
+model KnowledgeState {
+  id                     String    @id @default(dbgenerated("generate_nanoid()"))
+  userId                 String
+  topicId                String
+  stageId                String
+  hasLearned             Boolean  @default(false)
+  mastery                Float     @default(0.0)
+  updatedAt              DateTime  @updatedAt
+  avgDifficulty          Float?
+  correctAnswers         Int       @default(0)
+  incorrectAnswers       Int       @default(0)
+  lastActivity           DateTime? @updatedAt
+  preassessmentCompleted Boolean   @default(false)
+  totalQuestions         Int       @default(0)
+  totalTimeSpent         Int       @default(0)
+  assessmentNumber       Int       @default(0)
+  stage                  Stage     @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  topic                  Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  user                   User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, stageId])
+}
+
+model BKTParameters {
+  id         String @id @default(dbgenerated("generate_nanoid()"))
+  topicId    String
+  stageId    String
+  prior      Float
+  learnRate  Float
+  forgetRate Float
+  guessRate  Float
+  slipRate   Float
+  stage      Stage  @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  topic      Topic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
+}
+
+model UserBKTParameters {
+  id         String @id @default(dbgenerated("generate_nanoid()"))
+  stageId    String
+  userId    String
+  prior      Float
+  learnRate  Float
+  guessRate  Float
+  slipRate   Float
+  lastUpdated DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stage      Stage  @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, stageId])
+}
+
+enum QuestionType {
+  PREASSESSMENT
+  POSTASSESSMENT
+  PRACTICE
+}

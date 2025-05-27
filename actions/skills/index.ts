@@ -75,3 +75,31 @@ export const getStudentSkillProgress = async () => {
     return null;
   }
 };
+
+
+export const getStudentSkillProgressByStageId = async (stageId: string, userId:string) => {
+    try{
+    const studentSkills = await prisma.studentSkillProgress.findMany({
+      where: {
+        studentId:userId,
+      },
+      include: {
+        skill: {
+          include: {
+            stageSkills: {
+              where: {
+                stageId: stageId,
+              },
+            },
+          },
+        },
+      },
+    }
+    );
+    return studentSkills.filter(skill => skill.skill.stageSkills.length > 0);
+  } catch (error) {
+    console.error("Error fetching student skill progress by stage ID:", error);
+    return null;
+  }
+   
+}

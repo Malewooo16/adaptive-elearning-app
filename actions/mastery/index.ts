@@ -21,7 +21,8 @@ export const getUserKnowledgeStates = async (userId:string) =>{
             where: {
                 userId
             }, include:{
-              stage:true
+              stage:{include:{
+                topic:true}}
             }
         })
 
@@ -39,7 +40,8 @@ export const getCurrentStageMastery = async (stageId:string, userId:string) =>{
     try {
         const stageMastery = await prisma.knowledgeState.findFirst({
             where: {
-                stageId
+                stageId,
+                userId
             }
         })
         return stageMastery
@@ -88,7 +90,7 @@ export const processPreassessmentMastery = async (
       finalMastery = finalMastery * accuracy;
     } 
     if(finalMastery > 0.9){
-      finalMastery = 0.85;
+      finalMastery = 0.75;
       console.log(finalMastery)
     }
 
@@ -121,6 +123,8 @@ export const processUserMastery = async (
       correct: q.correct,
     }));
 
+    const totalTimeSpent = data.reduce((acc, q) => acc + (q.timeSpent || 0), 0);
+
     const params = await getBKTParameters(stageId);
     if (!params) return;
 
@@ -149,7 +153,7 @@ export const processUserMastery = async (
       user?.id as string
     );
     
-    await updateStageMastery(finalMastery, user?.id as string, stageId);
+    await updateStageMastery(finalMastery, user?.id as string, stageId, totalTimeSpent);
 
     // Calculate accuracy
     const correctCount = data.filter((item) => item.correct).length;
@@ -198,28 +202,39 @@ async function getBKTParameters(stageId: string) {
 }
 
 async function getSkillRatiosWithIdsAndUpdateSkillMastery(
-  groupedBySkill: Record<string, { correct: boolean }[]>,
-  studentId: string
+  groupedBySkill: Record<
+  string,
+  {
+    questionId: number;
+    correct: boolean;
+    weight: number;
+  }[]
+>,
+  studentId :string
 ): Promise<Record<string, { skillId: string; skillName: string; ratio: number }>> {
   const result: Record<string, { skillId: string; skillName: string; ratio: number }> = {};
 
   for (const skill in groupedBySkill) {
     const questions = groupedBySkill[skill];
-    const totalResponses = questions.length;
-    const correctResponses = questions.filter((q) => q.correct).length;
-    const ratio = totalResponses > 0 ? correctResponses / totalResponses : 0;
 
-    console.log(ratio , totalResponses, correctResponses);
-    // Find the skill ID from the database
+    let weightedCorrect = 0;
+    let totalWeight = 0;
+
+    for (const q of questions) {
+      totalWeight += q.weight;
+      if (q.correct) {
+        weightedCorrect += q.weight;
+      }
+    }
+
+    const ratio = totalWeight > 0 ? weightedCorrect / totalWeight : 0;
+
     const skillRecord = await prisma.skill.findFirst({
-      where: { 
-        name: { equals: skill.toLowerCase(), mode: "insensitive" } 
-      },
+      where: { name: { equals: skill.toLowerCase(), mode: "insensitive" } },
       select: { id: true, name: true },
     });
 
     if (skillRecord) {
-      // Upsert student skill progress
       await prisma.studentSkillProgress.upsert({
         create: {
           studentId,
@@ -237,10 +252,9 @@ async function getSkillRatiosWithIdsAndUpdateSkillMastery(
         },
       });
 
-      // Store the result with skillName included
       result[skill] = {
         skillId: skillRecord.id,
-        skillName: skillRecord.name, // Include skill name
+        skillName: skillRecord.name,
         ratio,
       };
     } else {
@@ -253,31 +267,37 @@ async function getSkillRatiosWithIdsAndUpdateSkillMastery(
 
 
 
-const updateStageMastery = async (mastery:number, userId:string,stageId:string) => {
-    const stage = await getStageInfo(stageId)
-    try {
-        await prisma.knowledgeState.upsert({
-            create: {
-              userId,
-              stageId,
-              mastery,
-              topicId: stage?.topicId as string,
-            },
-            update: {
-              mastery,
-             assessmentNumber:{increment: 1},
-            },
-            where: {
-              userId_stageId: {
-                userId,
-                stageId,
-              },
-            },
-          });
-    } catch (error) {
-        console.log(error)
-    }
-}
+
+const updateStageMastery = async (mastery: number, userId: string, stageId: string, timeSpent?: number) => {
+  const stage = await getStageInfo(stageId);
+  try {
+    await prisma.knowledgeState.upsert({
+      create: {
+        userId,
+        stageId,
+        mastery,
+        topicId: stage?.topicId as string,
+        totalTimeSpent: timeSpent ?? 0, // set initial timeSpent if creating
+        preassessmentCompleted:true
+      },
+      update: {
+        mastery,
+        assessmentNumber: { increment: 1 },
+        preassessmentCompleted:true,
+        // increment totalTimeSpent instead of overriding
+        ...(typeof timeSpent === "number" && { totalTimeSpent: { increment: timeSpent } }),
+      },
+      where: {
+        userId_stageId: {
+          userId,
+          stageId,
+        },
+      },
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const promoteStudentToNextStage = async (
   userId: string, 
@@ -338,7 +358,7 @@ const promoteStudentToNextStage = async (
     }
 
     // The key fix: Add a strict AND condition and return early if not met
-    if (!allSkillsMasteryAboveThreshold || !stageMasteryAboveThreshold) {
+    if (!stageMasteryAboveThreshold) {
       console.log(`Student hasn't mastered all skills or stage mastery is below threshold.`);
       return null; // Explicitly return null to indicate no promotion
     }
@@ -380,21 +400,35 @@ const promoteStudentToNextStage = async (
 
 
 
-
-  function groupQuestionsBySkill(questions: { questionId: number; correct: boolean; skill: string[] }[]): Record<string, { questionId: number; correct: boolean }[]> {
-    const grouped: Record<string, { questionId: number; correct: boolean }[]> = {};
-
-    for (const question of questions) {
-        for (const skill of question.skill) {
-            if (!grouped[skill]) {
-                grouped[skill] = [];
-            }
-            grouped[skill].push({ questionId: question.questionId, correct: question.correct });
-        }
-    }
-
-    return grouped;
+function difficultyToWeight(difficulty: string): number {
+  switch (difficulty.toLowerCase()) {
+    case "easy": return 1;
+    case "medium": return 2;
+    case "hard": return 3;
+    default: return 1; // Fallback to easy
+  }
 }
+
+function groupQuestionsBySkill(questions: QuestionResponses[]): Record<string, { questionId: number; correct: boolean; weight: number }[]> {
+  const grouped: Record<string, { questionId: number; correct: boolean; weight: number }[]> = {};
+
+  for (const question of questions) {
+    const weight = difficultyToWeight(question.difficulty);
+    for (const skill of question.skill) {
+      if (!grouped[skill]) {
+        grouped[skill] = [];
+      }
+      grouped[skill].push({
+        questionId: question.questionId,
+        correct: question.correct,
+        weight,
+      });
+    }
+  }
+
+  return grouped;
+}
+
 
 export async function updateUserBKTParams(
   userId: string,

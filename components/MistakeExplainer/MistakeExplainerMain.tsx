@@ -49,7 +49,7 @@ const MistakeExplainerMain: React.FC<IMistakeExplainerMainProps> = ({
 
   return (
     <div
-    className={`fixed right-0 top-0 h-full w-1/2 bg-white shadow-xl border-l border-blue-900 p-6 flex flex-col justify-between overflow-scroll transform transition-transform duration-500 ${
+    className={`fixed right-0 top-0 h-full w-1/2 bg-white shadow-xl border-l border-orange-900 p-6 flex flex-col justify-between overflow-scroll transform transition-transform duration-500 ${
       sidebar ? "translate-x-0" : "translate-x-full"
     }`}
   >
@@ -77,9 +77,9 @@ const MistakeExplainerMain: React.FC<IMistakeExplainerMainProps> = ({
                     } text-gray-800`}
                   >
                     <td className="py-3 px-4 font-semibold border border-blue-300 text-orange-500">
-                      {step.step}
+                      {index + 1}
                     </td>
-                    <td className="py-3 px-4 border border-blue-300">{step.explanation || "N/A"}</td>
+                    <td className="py-3 px-4 border border-blue-300">{step.step || "N/A"}</td>
                     <td className="py-3 px-4 border border-blue-300">{renderMath(step.calculation)}</td>
                   </tr>
                 ))}

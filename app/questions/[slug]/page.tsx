@@ -40,6 +40,7 @@ export default async function Page({
   // If no questions exist, generate new ones
   if (questionsArray === null) {
    const prompt = await getStageQuestionGenPrompt(slug as string);
+   const enhancedPrompt = prompt + ""
    
   
 // console.log(prompt);

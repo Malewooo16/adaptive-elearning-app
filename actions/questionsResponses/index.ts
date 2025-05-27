@@ -16,11 +16,12 @@ export const saveUserResponse = async(responses:any)=>{
 }
 
 
-export const getUserResponses = async(userId:string)=>{
+export const getUserResponses = async(userId:string, stageId?:string)=>{
     try{
          const response = await prisma.questionResponse.findMany({
       where: {
         userId,
+        stageId
       }
     });
     return response

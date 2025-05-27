@@ -3,6 +3,7 @@ import { InlineMath } from "react-katex"; // Ensure you have react-katex install
 
 const useRenderMath = () => {
   return useMemo(() => (text: string) => {
+    
     const parts = text.split(/(\$[^$]+\$)/g); // Splits text but keeps math parts
 
     return parts.map((part, index) =>

@@ -25,7 +25,8 @@ export const getUserCurrentStageId = async(userId: string) => {
 export const getStageInfo = async (stageId:string) =>{
  try {
     const stage = await prisma.stage.findUnique({
-        where:{id:stageId}
+        where:{id:stageId}, include:{
+            topic:true, }
     })
     return stage;
  } catch (error) {

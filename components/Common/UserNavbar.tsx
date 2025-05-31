@@ -1,5 +1,5 @@
 import { getUserSessionInclusive } from "@/actions/user";
-import { signOut } from "@/auth/authOptions";
+import { signOut } from "next-auth/react";
 import Link from "next/link";
 import SignOut from "../Auth/SignOut";
 
@@ -17,7 +17,7 @@ export default async function UserNavbar() {
           href="/"
           className="text-2xl font-bold tracking-wide hover:text-white/90 transition"
         >
-          Foxxie Learn
+          EduNex
         </Link>
       </div>
 

@@ -5,7 +5,7 @@ import NextAuth from "next-auth";
 const { auth } = NextAuth(authOptions);
 
 // Define routes that don't require authentication
-const publicRoutes = ["/login", "/forgetpassword", "/"];
+const publicRoutes = ["/login", "/forgetpassword", "/", "/register", "/onboarding"];
 
 export default auth((req) => {
   // req.auth will be the session object or null if not authenticated
@@ -44,12 +44,9 @@ export default auth((req) => {
 // Configure which routes the middleware applies to
 export const config = {
   matcher: [
-    /*
-     * Match all paths except:
-     * 1. /api routes
-     * 2. /_next (Next.js internals)
-     * 3. Static files (images, etc.)
-     */
-    '/((?!api|_next|.*\\..*|favicon.ico).*)',
+    "/((?!_next/static|_next/image|favicon.ico|login|forgetpassword|register).*)",
+    "/api/auth/:path*",
+    // Exclude static files and auth pages, but include api/auth
+    // Add more paths as needed
   ],
 };

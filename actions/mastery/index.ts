@@ -443,6 +443,7 @@ export async function updateUserBKTParams(
     });
   } catch (error) {
     console.error('Error updating user BKT parameters:', error);
+    return null
   }
 }
 

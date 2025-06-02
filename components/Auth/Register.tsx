@@ -1,6 +1,7 @@
 "use client";
 
 import registerUser from "@/actions/auth/register";
+import { sendVerificationEmail } from "@/actions/emailService/verifyUserEmail";
 import {CheckCircle} from "lucide-react";
 import Link from "next/link";
 import {useState} from "react";
@@ -44,6 +45,10 @@ export default function Register() {
     }
   };
 
+
+
+
+
   const handleGoogleSignIn = () => {
     // Placeholder for Google auth logic
     console.log("Sign in with Google");
@@ -59,12 +64,10 @@ export default function Register() {
           <h2 className="text-2xl font-bold text-gray-800 mb-2">
             Registration Successful!
           </h2>
-          <p className="text-gray-600 mb-6">
-            Your account has been created. You can now log in to your account.
-          </p>
-          <button className="w-full bg-orange-600 text-white font-semibold py-2 px-4 rounded-xl hover:bg-orange-700 transition">
-            <Link href="/login">Go to Login</Link>
-          </button>
+            <p className="text-gray-600 mb-6">
+            An email verification link has been sent to your email address. Please check your inbox and follow the instructions to verify your account.Once your email is verified, you can log in and start exploring EduNex!
+            </p>
+          
         </div>
       </div>
     );

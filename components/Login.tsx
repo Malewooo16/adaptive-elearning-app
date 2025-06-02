@@ -21,15 +21,12 @@ export default function Login() {
     setLoading(true);
     setError("");
 
-    try {
-      // Replace with actual authentication logic
-      await handleCredentialsLogin(formData);
-      console.log("Login successful", formData);
-    } catch (err) {
-      setError("Invalid credentials");
-      console.log("Login failed", err);
-    } finally {
-      setLoading(false);
+   setLoading(true)
+    const response = await handleCredentialsLogin(formData);
+    if (response.error) {
+      setLoading(false)
+      setError(response.error);
+    }else{
       redirect(`/topics`);
     }
   };
@@ -47,10 +44,12 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && <div className="text-red-500 text-sm text-center font-semibold">Error:{error}</div>}
             <div className="relative">
               <Mail className="absolute left-3 top-3 w-5 h-5 text-orange-500" />
               <input
                 type="email"
+                name="email"
                 placeholder="Email"
                 className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 value={formData.email}
@@ -62,6 +61,7 @@ export default function Login() {
               <Lock className="absolute left-3 top-3 w-5 h-5 text-orange-500" />
               <input
                 type="password"
+                name="password"
                 placeholder="Password"
                 className="w-full border border-gray-300 rounded-lg pl-10 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
                 value={formData.password}
@@ -73,8 +73,14 @@ export default function Login() {
               type="submit"
               className="w-full bg-orange-600 text-white py-2 rounded-lg hover:bg-orange-700 transition duration-200 flex items-center justify-center gap-2"
             >
-              <LogIn className="w-5 h-5" />
-              Log In
+              {loading ? (
+             <span className="loading loading-spinner loading-lg"></span>
+              ) : (
+                <span className="flex items-center gap-2">
+                  <LogIn className="w-5 h-5" />
+                  Login </span>
+              )}
+            
             </button>
           </form>
 

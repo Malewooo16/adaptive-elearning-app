@@ -1,5 +1,6 @@
 "use client";
 
+import { createUserGoals } from "@/actions/userGoals";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -12,14 +13,15 @@ const goals = [
   {
     type: "Mastery Goal",
     description: "Reach mastery in your learning stage",
-    options: ["50%", "75%", "90%"],
+    options: [50, 75, 90],
   },
 ];
 
-export default function WelcomeGoals() {
+export default function WelcomeGoals({userId}:{userId:string}) {
   const [selectedGoals, setSelectedGoals] = useState<{ [key: string]: string }>({});
   const [step, setStep] = useState(1);
-  const [goalError, setgoalError] = useState(false)
+  const [goalError, setGoalError] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const handleSelect = (goalType: string, option: string) => {
     setSelectedGoals((prev) => {
@@ -38,15 +40,35 @@ export default function WelcomeGoals() {
     return selectedGoals[goalType] === option;
   };
 
-  const handleStart = () => {
-    if (Object.keys(selectedGoals).length === 0) {
-      //alert("Please select at least one goal to continue.");
-      setgoalError(true);
-      return;
+const handleStart = async () => {
+  setLoading(true);
+  setGoalError(false); // Reset error state on new attempt
+
+  if (Object.keys(selectedGoals).length === 0) {
+    setGoalError(true);
+    setLoading(false);
+    return;
+  }
+
+  try {
+    const response = await createUserGoals(userId, selectedGoals);
+
+    if (response.success) {
+      setStep(3);
+      console.log("Goals successfully set:", selectedGoals);
+    } else {
+      setGoalError(true);
+      console.error("Failed to create user goals:", response.message);
     }
-    setStep(3);
-    console.log("Goals set:", selectedGoals);
-  };
+
+  } catch (error) {
+    setGoalError(true);
+    console.error("Error creating user goals:", error);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-orange-50 px-4">
@@ -88,7 +110,7 @@ export default function WelcomeGoals() {
                             : "border-gray-300 text-gray-700 hover:bg-orange-100"
                         }`}
                       >
-                        {option} {goal.type === "Practice Goal" ? "Qns" : ""}
+                        {option} {goal.type === "Practice Goal" ? "Qns" : "%"}
                       </button>
                     ))}
                   </div>
@@ -103,7 +125,9 @@ export default function WelcomeGoals() {
               onClick={handleStart}
               className="mt-4 w-full bg-orange-600 text-white py-3 rounded-xl font-medium hover:bg-orange-700 transition"
             >
-              Continue
+              {loading ? (
+                <span className="loading loading-spinner loading-lg"></span>) :( <span>Continue</span>
+              )}
             </button>
           </div>
         )}

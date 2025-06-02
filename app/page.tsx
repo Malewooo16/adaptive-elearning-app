@@ -74,7 +74,7 @@ export default function LandingPage() {
       </section>
 
       <footer className="text-center py-6 text-sm text-gray-500">
-        © {new Date().getFullYear()} EduNex. All rights reserved.
+        © {new Date().getFullYear()} EduNex. All rights reserved. <a target="_blank" href="https://icons8.com/icon/40811/fox">Fox</a> icon by <a target="_blank" href="https://icons8.com">Icons8</a>
       </footer>
     </div>
   );

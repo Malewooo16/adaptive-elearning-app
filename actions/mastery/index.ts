@@ -7,7 +7,7 @@ import { saveUserResponse } from "../questionsResponses";
 
 
 interface  QuestionResponses {
-    questionId: number;
+    originalQuestionIndex: number;
     selectedOption: string | null;
     correct: boolean;
     skill: string[];
@@ -119,7 +119,7 @@ export const processUserMastery = async (
 
     // Extract necessary parameters for BKT
     const stageResponsesForBKT = data.map((q) => ({
-      questionId: q.questionId,
+      questionId: q.originalQuestionIndex,
       correct: q.correct,
     }));
 
@@ -134,15 +134,18 @@ export const processUserMastery = async (
 
     // Combine original data with BKT results
     const enrichedResults = data.map((q, index) => ({
-      ...q,
-      questionId: q.questionId.toString(),
+      questionId: q.originalQuestionIndex.toString(),
       correct: undefined,
       isCorrect: q.correct,
       priorP_L: bktResults[index].priorP_L,
       posteriorP_L: bktResults[index].posteriorP_L,
       userId: user.id,
       stageId,
-      assessmentId:q.assessmentId
+      assessmentId:q.assessmentId,
+      selectedOption: q.selectedOption,
+      skill: q.skill,
+      difficulty: q.difficulty,
+      timeSpent: q.timeSpent,
     }));
 
     // Save the enriched results to the database
@@ -419,7 +422,7 @@ function groupQuestionsBySkill(questions: QuestionResponses[]): Record<string, {
         grouped[skill] = [];
       }
       grouped[skill].push({
-        questionId: question.questionId,
+        questionId: question.originalQuestionIndex,
         correct: question.correct,
         weight,
       });

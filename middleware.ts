@@ -5,7 +5,7 @@ import NextAuth from "next-auth";
 const { auth } = NextAuth(authOptions);
 
 // Define routes that don't require authentication
-const publicRoutes = ["/login", "/forgetpassword", "/", "/register", "/onboarding"];
+const publicRoutes = ["/login", "/forgetpassword", "/", "/register", "/verify"];
 
 export default auth((req) => {
   // req.auth will be the session object or null if not authenticated

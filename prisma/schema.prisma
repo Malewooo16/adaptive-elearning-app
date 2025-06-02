@@ -15,6 +15,7 @@ model User {
   emailVerified      DateTime?           @map("email_verified")
   image              String?
   role               String              @default("user")
+  newUser            Boolean             @default(true)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
   currentStageNumber Int                 @default(1)
@@ -30,6 +31,8 @@ model User {
   QuestionResponse QuestionResponse[]
 
   UserBKTParameters UserBKTParameters[]
+
+  UserGoals UserGoals?
 }
 
 model Account {
@@ -90,7 +93,6 @@ model Topic {
   BKTParameters  BKTParameters[]
   KnowledgeState KnowledgeState[]
   stages         Stage[]
-
 }
 
 model Stage {
@@ -129,7 +131,7 @@ model StudentSkillProgress {
   mastery     Float    @default(0.0)
   lastUpdated DateTime @updatedAt
   skill       Skill    @relation(fields: [skillId], references: [id], onDelete: Cascade)
-  user        User    @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, skillId])
 }
@@ -158,7 +160,7 @@ model AIQuestions {
 
 model QuestionPrompts {
   id        String   @id @default(dbgenerated("generate_nanoid()"))
-  prompt   String
+  prompt    String
   stageId   String
   createdAt DateTime @default(now())
   stage     Stage    @relation(fields: [stageId], references: [id], onDelete: Cascade)
@@ -175,23 +177,22 @@ model UserPreAssessment {
 }
 
 model QuestionResponse {
-  id                  String            @id @default(dbgenerated("generate_nanoid()"))
-  userId              String
-  stageId             String  
-  questionId          String
-  assessmentId         String?     @default("")
-  selectedOption      String
-  isCorrect           Boolean
-  skill               String[]
-  difficulty          String
-  priorP_L            Float
-  posteriorP_L        Float
-  timeSpent           Float
-  timestamp           DateTime          @default(now())
+  id             String   @id @default(dbgenerated("generate_nanoid()"))
+  userId         String
+  stageId        String
+  questionId     String
+  assessmentId   String?  @default("")
+  selectedOption String
+  isCorrect      Boolean
+  skill          String[]
+  difficulty     String
+  priorP_L       Float
+  posteriorP_L   Float
+  timeSpent      Float
+  timestamp      DateTime @default(now())
 
-  stage           Stage    @relation(fields: [stageId], references: [id], onDelete: Cascade)
-  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
+  stage Stage @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([stageId])
@@ -213,7 +214,7 @@ model KnowledgeState {
   userId                 String
   topicId                String
   stageId                String
-  hasLearned             Boolean  @default(false)
+  hasLearned             Boolean   @default(false)
   mastery                Float     @default(0.0)
   updatedAt              DateTime  @updatedAt
   avgDifficulty          Float?
@@ -245,19 +246,32 @@ model BKTParameters {
 }
 
 model UserBKTParameters {
-  id         String @id @default(dbgenerated("generate_nanoid()"))
-  stageId    String
-  userId    String
-  prior      Float
-  learnRate  Float
-  guessRate  Float
-  slipRate   Float
+  id          String   @id @default(dbgenerated("generate_nanoid()"))
+  stageId     String
+  userId      String
+  prior       Float
+  learnRate   Float
+  guessRate   Float
+  slipRate    Float
   lastUpdated DateTime @updatedAt
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  stage      Stage  @relation(fields: [stageId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stage Stage @relation(fields: [stageId], references: [id], onDelete: Cascade)
 
   @@unique([userId, stageId])
+}
+
+model UserGoals {
+  id            String   @id @default(dbgenerated("generate_nanoid()"))
+  userId        String   @unique
+  questionsGoal Int?
+  masteryGoal   Int?
+  createdAt     DateTime @default(now())
+  lastUpdated   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+
 }
 
 enum QuestionType {

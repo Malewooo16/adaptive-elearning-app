@@ -1,6 +1,5 @@
 "use server"
 
-
 import { signIn } from "@/auth/authOptions";
 
 
@@ -11,8 +10,8 @@ export const handleCredentialsLogin = async (formData:any) => {
         const response = await signIn("credentials", {email  , password, redirect:false});
         return response;
     }catch (error) { 
-        console.log("Credentials Error" + error);
-        return {error: "Invalid Credentials"}
+        console.log("Credentials Error"+ error);
+        return {success:false, error: "Invalid credentials"}; 
     }
    
 }

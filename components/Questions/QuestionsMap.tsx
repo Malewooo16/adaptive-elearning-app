@@ -127,7 +127,7 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
     }
   }, [mastery]);
 
-   console.log(skillsResponse)
+   //console.log(skillsResponse)
 
   // Determine the question object currently being displayed
   const currentActiveQuestion: IQuestion | undefined = reviewingWrongQuestions

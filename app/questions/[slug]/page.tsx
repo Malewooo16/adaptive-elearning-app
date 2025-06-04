@@ -50,7 +50,7 @@ export default async function Page({
       slug as string
     );
 
-  console.log(generatedQuestions?.id)
+  //console.log(generatedQuestions?.id)
 
     return (<div>
       <QuestionsMap questions={generatedQuestions?.questions} stageId={slug as string} aiQuestionId={generatedQuestions?.id} />

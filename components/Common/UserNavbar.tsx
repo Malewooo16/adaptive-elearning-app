@@ -72,6 +72,14 @@ export default async function UserNavbar() {
                     📈 My Progress
                   </Link>
                 </li>
+                 <li>
+                  <Link
+                    href="/smart-insights"
+                    className="hover:text-orange-500 transition"
+                  >
+                   🧠 Smart Insights
+                  </Link>
+                </li>
                 <li>
                   <Link
                     href="/settings"

@@ -21,29 +21,27 @@ export default function Register() {
     setFormData({...formData, [e.target.name]: e.target.value});
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const response = await registerUser(formData);
-      if (response.success) {
-        setSuccess(true);
-      } else {
-        // Handle registration error
-        console.error("Registration failed:", response.message);
-      }
-    } catch (error) {
-      // Handle unexpected errors
-      console.error("An error occurred during registration:", error);
-    } finally {
-      setLoading(false);
-      if (error) {
-        setError("An error occurred during registration. Please try again.");
-      } else {
-        setSuccess(true);
-      }
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  setLoading(true);
+  setError(null); // Clear previous errors
+  setSuccess(false); // Optional: reset previous success state
+
+  try {
+    const response = await registerUser(formData);
+    if (response.success) {
+      setSuccess(true);
+    } else {
+      setError(response.message || "Registration failed");
+      console.error("Registration failed:", response.message);
     }
-  };
+  } catch (err) {
+    console.error("An error occurred during registration:", err);
+    setError("An unexpected error occurred. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
 
 
 
@@ -151,7 +149,7 @@ export default function Register() {
                 className="mt-1 w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-orange-500"
               />
             </div>
-
+            {error && (<div className="text-red-500 text-sm text-center"> <p>{error}</p></div>)}
             <button
               type="submit"
               disabled={loading}

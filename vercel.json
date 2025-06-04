@@ -1,6 +1,6 @@
 
 {
-  "cron": [
+  "crons": [
     {
       "path": "/api/cron/check-user-goals",
       "schedule": "0 15 * * *" 

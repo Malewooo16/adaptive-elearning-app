@@ -1,7 +1,7 @@
 import {getUserKnowledgeStates} from "@/actions/mastery";
 import {getTopics} from "@/actions/topics";
 import {auth} from "@/auth/authOptions";
-import {CheckCircle, Lock, Star, ArrowRight} from "lucide-react";
+import {CheckCircle, Lock, Star, ArrowRight, BookOpen} from "lucide-react";
 import Progress from "@/components/Progress";
 import Link from "next/link";
 import {getUserCurrentStageId} from "@/actions/stages";
@@ -125,9 +125,19 @@ export default async function TopicsPage() {
                         </div>
 
                         <div className="collapse-content">
-                          <p className="text-gray-700 text-sm mb-2">
-                            Improve your mastery by solving more problems!
-                          </p>
+                          <div className="flex justify-between items-center">
+                            <p className="text-gray-700 text-sm">
+                              Improve your mastery by solving more problems!
+                            </p>
+                            {mastery && (<div className="tooltip tooltip-left z-20" data-tip={`Learn more about ${stage.title}`}>
+                              
+                                <Link href={`/stage/${slugify(stage.title)}`} className="text-gray-700">
+                                  {" "}
+                                  <BookOpen />
+                                </Link>
+                              
+                            </div>)}
+                          </div>
                           <div className="mt-3 flex justify-between items-center">
                             <StageInfoWithSkills stageId={stage.id} />
                             <Link
@@ -155,8 +165,8 @@ export default async function TopicsPage() {
                                 {mastery === 0
                                   ? "Start Pre-Assessment"
                                   : !hasLearned
-                                  ? "Reinforce"
-                                  : "Continue"}
+                                    ? "Reinforce"
+                                    : "Continue"}
                                 <ArrowRight size={16} />
                               </button>
                             </Link>

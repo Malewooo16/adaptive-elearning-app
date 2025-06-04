@@ -2,7 +2,7 @@ import { getUserSessionInclusive } from "@/actions/user";
 import UpdateParameters from "@/components/BKTParameters/UpdateParameters";
 import prisma from "@/db/prisma";
 import { redirect } from "next/navigation";
-import React from "react";
+
 
 export default async function UpdateBKTParameters() {
     const user = await getUserSessionInclusive();

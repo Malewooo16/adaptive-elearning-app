@@ -5,7 +5,7 @@ import NextAuth from "next-auth";
 const { auth } = NextAuth(authOptions);
 
 // Define routes that don't require authentication
-const publicRoutes = ["/login", "/forgetpassword", "/", "/register", "/verify"];
+const publicRoutes = ["/login", "/forgetpassword", "/", "/register", "/verify",  "/api/cron/check-user-goals",];
 
 export default auth((req) => {
   // req.auth will be the session object or null if not authenticated
@@ -45,7 +45,7 @@ export default auth((req) => {
 export const config = {
   matcher: [
     "/((?!_next/static|_next/image|favicon.ico|login|forgetpassword|register).*)",
-    "/api/auth/:path*",
+    "/api/auth/:path*",// Include API cron routes
     // Exclude static files and auth pages, but include api/auth
     // Add more paths as needed
   ],

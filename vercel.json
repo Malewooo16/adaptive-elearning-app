@@ -1,0 +1,13 @@
+
+{
+  "cron": [
+    {
+      "path": "/api/cron/check-user-goals",
+      "schedule": "0 15 * * *" 
+        },
+    {
+      "path": "/api/cron/check-user-goals",
+      "schedule": "0 18 * * *"
+    }
+  ]
+}

@@ -270,8 +270,6 @@ model UserGoals {
   lastUpdated   DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id])
-
-
 }
 
 enum QuestionType {

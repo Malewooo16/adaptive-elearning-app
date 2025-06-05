@@ -7,14 +7,17 @@ import Link from "next/link";
 const Dashboard = ({userData}: {userData: DashboardInfo}) => {
   const containerRef = useRef(null);
 
-  useEffect(() => {
+ useEffect(() => {
+  if (containerRef.current) {
     gsap.from(containerRef.current, {
       opacity: 0,
       y: 20,
       duration: 1,
       ease: "power3.out",
     });
-  }, []);
+  }
+}, []);
+
 
   const {user, currentStage, knowledgeStates, skillProgress} = userData;
 

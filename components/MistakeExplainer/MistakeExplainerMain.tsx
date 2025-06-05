@@ -79,7 +79,7 @@ const MistakeExplainerMain: React.FC<IMistakeExplainerMainProps> = ({
                     <td className="py-3 px-4 font-semibold border border-blue-300 text-orange-500">
                       {index + 1}
                     </td>
-                    <td className="py-3 px-4 border border-blue-300">{step.step || "N/A"}</td>
+                    <td className="py-3 px-4 border border-blue-300">{renderMath(step.step) || "N/A"}</td>
                     <td className="py-3 px-4 border border-blue-300">{renderMath(step.calculation)}</td>
                   </tr>
                 ))}

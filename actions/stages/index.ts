@@ -53,7 +53,7 @@ export const getStageQuestionGenPrompt = async (stageId:string) =>{
 
 export const updateLearningStatus = async(stageId: string, hasLearned:boolean, score:any)=>{
   try{
-    console.log(score)
+    console.log(hasLearned)
     const user = await getUserSessionInclusive()
     await prisma.knowledgeState.update({
         where:{
@@ -62,7 +62,9 @@ export const updateLearningStatus = async(stageId: string, hasLearned:boolean, s
                 stageId
             }
         },
-        data:{hasLearned}
+        data:{
+            hasLearned:true
+        }
         
     })
     console.log("Executed Successfully")

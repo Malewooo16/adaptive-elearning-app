@@ -119,7 +119,7 @@ export default async function TopicsPage() {
                             ) : (
                               <Lock className="text-gray-400" size={24} />
                             )}
-                            <p className="text-sm text-gray-700">{mastery}%</p>
+                            <p className="text-sm text-gray-700">{mastery.toFixed(2)}%</p>
                             <Progress value={mastery} />
                           </div>
                         </div>

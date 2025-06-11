@@ -176,7 +176,9 @@ export const processUserMastery = async (
 
     await promoteStudentToNextStage(user.id, updatedCorrectResponseRatios, finalMastery, user, stageId);
 
-    return { stageMastery: finalMastery, updatedCorrectResponseRatios, enrichedResults };
+    console.log(updatedCorrectResponseRatios)
+    return { stageMastery: finalMastery, skillsResults : updatedCorrectResponseRatios, enrichedResults };
+
   } catch (error) {
     console.error(error);
     return null;

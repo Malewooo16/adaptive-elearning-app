@@ -109,7 +109,7 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
         gsap.gsap.fromTo(
           ".mastery-progress",
           {width: "0%"},
-          {width: `${mastery * 100}%`, duration: 1.5, ease: "power2.out"},
+          {width: `${mastery * 100}%`, duration: 1.5, ease: "power2.out"}
         );
         gsap.gsap.fromTo(
           ".skill-ratio",
@@ -121,13 +121,13 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
             ease: "elastic.out(1, 0.5)",
             delay: 0.3,
             stagger: 0.1,
-          },
+          }
         );
       });
     }
   }, [mastery]);
 
-   //console.log(skillsResponse)
+  //console.log(skillsResponse)
 
   // Determine the question object currently being displayed
   const currentActiveQuestion: IQuestion | undefined = reviewingWrongQuestions
@@ -144,8 +144,8 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
       const response = await processUserMastery(responses, stageId);
       if (!response) return;
       setMastery(response.stageMastery);
-      setSkillsResponse(response.updatedCorrectResponseRatios);
-      console.log(skillsResponse)
+      setSkillsResponse(response.skillsResults);
+      console.log(skillsResponse);
       // Automatically delete the AI question and clear local storage upon completion
       await deleteAiQuestion(aiQuestionId);
       localStorage.removeItem(`quiz-state-${stageId}`);
@@ -180,7 +180,7 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
       // If correct and in review mode, remove from wrongQuestions
       if (reviewingWrongQuestions) {
         const updatedWrongQuestions = wrongQuestions.filter(
-          (index) => index !== currentActiveQuestionOriginalIndex,
+          (index) => index !== currentActiveQuestionOriginalIndex
         );
         setWrongQuestions(updatedWrongQuestions);
 
@@ -191,8 +191,8 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
         } else {
           // If there are still wrong questions, move to the next one in the review list
           // This logic ensures we cycle through remaining wrong questions
-          setCurrentWrongQuestionIndex(
-            (prev) => (prev >= updatedWrongQuestions.length - 1) ? 0 : prev + 1,
+          setCurrentWrongQuestionIndex((prev) =>
+            prev >= updatedWrongQuestions.length - 1 ? 0 : prev + 1
           );
         }
       }
@@ -201,10 +201,11 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
       setFeedback("Incorrect!");
       setCorrectAnswerVisible(true);
       // Add the original index of the incorrect question to wrongQuestions if not already there
-      if (
-        !wrongQuestions.includes(currentActiveQuestionOriginalIndex)
-      ) {
-        setWrongQuestions((prev) => [...prev, currentActiveQuestionOriginalIndex]);
+      if (!wrongQuestions.includes(currentActiveQuestionOriginalIndex)) {
+        setWrongQuestions((prev) => [
+          ...prev,
+          currentActiveQuestionOriginalIndex,
+        ]);
       }
       // User stays on the current question if incorrect unless they click "Next" (main quiz) or "Try Again" (review quiz)
     }
@@ -226,18 +227,23 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
     } else {
       // If not reviewing wrong questions (i.e., in the main quiz flow)
       setCurrentQuestion((prev) => prev + 1); // Always move to the next question in the initial set
-      if (currentQuestion + 1 >= questions.length && wrongQuestions.length > 0) {
+      if (
+        currentQuestion + 1 >= questions.length &&
+        wrongQuestions.length > 0
+      ) {
         // If all initial questions are answered and there are wrong questions,
         // transition to review mode for wrong questions.
         setReviewingWrongQuestions(true);
         setCurrentWrongQuestionIndex(0);
-      } else if (currentQuestion + 1 >= questions.length && wrongQuestions.length === 0) {
+      } else if (
+        currentQuestion + 1 >= questions.length &&
+        wrongQuestions.length === 0
+      ) {
         // If all initial questions are answered and NO wrong questions, process mastery directly
         processMasteryAndFinish();
       }
     }
   };
-
 
   const handleReset = async () => {
     try {
@@ -275,7 +281,7 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
           <InlineMath key={index}>{part.slice(1, -1)}</InlineMath>
         ) : (
           <span key={index}>{part}</span>
-        ),
+        )
       );
 
   if (!initialized) {
@@ -348,7 +354,7 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
           {!sidebar && (
             <button
               onClick={handleSubmit}
-              disabled={!selectedOption || isAnimating}
+              disabled={!selectedOption}
               className="mt-5 w-full py-2 rounded-lg bg-green-500 hover:bg-green-600 text-white font-semibold shadow"
             >
               Submit
@@ -365,20 +371,21 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
               >
                 {feedback}
               </p>
-              {feedback === "Incorrect!" && correctAnswerVisible && ( // Correct answer explanation visible only for incorrect attempts
-                <div className="mt-2">
-                  <p className="text-red-600 text-sm">
-                    Correct answer:{" "}
-                    {renderQuestion(currentActiveQuestion.answer)}
-                  </p>
-                  <button
-                    onClick={() => setSidebar(true)}
-                    className="mt-3 text-sm text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
-                  >
-                    Explain My Mistake
-                  </button>
-                </div>
-              )}
+              {feedback === "Incorrect!" &&
+                correctAnswerVisible && ( // Correct answer explanation visible only for incorrect attempts
+                  <div className="mt-2">
+                    <p className="text-red-600 text-sm">
+                      Correct answer:{" "}
+                      {renderQuestion(currentActiveQuestion.answer)}
+                    </p>
+                    <button
+                      onClick={() => setSidebar(true)}
+                      className="mt-3 text-sm text-white bg-red-500 hover:bg-red-600 px-3 py-1 rounded"
+                    >
+                      Explain My Mistake
+                    </button>
+                  </div>
+                )}
             </div>
           )}
 
@@ -405,32 +412,48 @@ const QuestionsMap: React.FC<PreAssessmentComponentProps> = ({
           <div className="relative w-full h-6 bg-orange-100 rounded-full overflow-hidden shadow-inner">
             <div
               className="mastery-progress h-full bg-gradient-to-r from-orange-500 to-orange-600 text-white text-sm font-bold flex items-center justify-center transition-all duration-700 ease-out"
-              style={{width: `${(mastery * 100).toFixed(0)}%`}}
+              style={{
+                width: `${(mastery * 100).toFixed(0)}%`,
+                minWidth:
+                  mastery > 0 && mastery * 100 < 10 ? "2rem" : undefined,
+              }}
             >
               {(mastery * 100).toFixed(0)}%
             </div>
           </div>
+
           <div className="mt-6">
             <h3 className="text-xl font-semibold text-gray-700 mb-3">
               Skill Breakdown:
             </h3>
             {Object.entries(skillsResponse).length > 0 ? (
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {Object.entries(skillsResponse).map(([skill, ratio]: [string, any]) => (
-                  <li
-                    key={skill}
-                    className="skill-ratio bg-gray-50 p-3 rounded-lg shadow-sm flex justify-between items-center"
-                  >
-                    <span className="text-gray-700 font-medium">{skill}:</span>
-                    <span
-                      className={`font-bold ${
-                        ratio >= 0.8 ? "text-green-600" : "text-red-600"
-                      }`}
+                {Object.entries(skillsResponse).map(([skill, value]) => {
+                  const skillValue = value as {
+                    skillId: string;
+                    skillName: string;
+                    ratio: number;
+                  };
+                  return (
+                    <li
+                      key={skillValue.skillId}
+                      className="skill-ratio bg-gray-50 p-3 rounded-lg shadow-sm flex justify-between items-center"
                     >
-                      {(ratio * 100).toFixed(0)}% Correct
-                    </span>
-                  </li>
-                ))}
+                      <span className="text-gray-700 font-medium">
+                        {skill}:
+                      </span>
+                      <span
+                        className={`font-bold ${
+                          skillValue.ratio >= 0.8
+                            ? "text-green-600"
+                            : "text-red-600"
+                        }`}
+                      >
+                        {(skillValue.ratio * 100).toFixed(0)}% Correct
+                      </span>
+                    </li>
+                  );
+                })}
               </ul>
             ) : (
               <p className="text-gray-600">No skill data available.</p>

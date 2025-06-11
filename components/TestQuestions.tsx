@@ -1,14 +1,14 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, {useEffect, useRef, useState} from "react";
 import "katex/dist/katex.min.css";
-import { InlineMath } from "react-katex";
-import { useReward } from "react-rewards";
+import {InlineMath} from "react-katex";
+import {useReward} from "react-rewards";
 import Link from "next/link";
-import { Question } from "@prisma/client";
-import { processPreassessmentMastery } from "@/actions/mastery";
-import { useParams } from "next/navigation";
-import { gsap } from "gsap";
+import {Question} from "@prisma/client";
+import {processPreassessmentMastery} from "@/actions/mastery";
+import {useParams} from "next/navigation";
+import {gsap} from "gsap";
 
 interface PreAssesmentComponentProps {
   topicId: string;
@@ -25,13 +25,13 @@ const PreAssessment: React.FC<PreAssesmentComponentProps> = ({
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [responses, setResponses] = useState<
-    { questionId: number; selectedOption: string | null; correct: boolean }[]
+    {questionId: number; selectedOption: string | null; correct: boolean}[]
   >([]);
   const [correctAnswerVisible, setCorrectAnswerVisible] = useState(false);
   const [mastery, setMastery] = useState<number | null>();
-  const params = useParams<{ slug: string }>();
+  const params = useParams<{slug: string}>();
 
-  const { reward, isAnimating } = useReward("rewardId", "confetti");
+  const {reward, isAnimating} = useReward("rewardId", "confetti");
 
   const containerRef = useRef(null);
   const progressBarRef = useRef(null);
@@ -187,14 +187,16 @@ const PreAssessment: React.FC<PreAssesmentComponentProps> = ({
 
           {/* Mastery Progress Bar */}
           <div className="mt-4">
-            <p className="text-lg font-semibold text-gray-800">
-              Mastery Level
-            </p>
+            <p className="text-lg font-semibold text-gray-800">Mastery Level</p>
             <div className="relative w-full max-w-md mx-auto bg-gray-200 rounded-full h-6 shadow-inner overflow-hidden">
               <div
                 ref={progressBarRef}
                 className="h-full bg-orange-600 text-white text-sm font-bold flex items-center justify-center transition-all rounded-full"
-                style={{ width: "0%" }}
+                style={{
+                  width: `${(mastery || 0 * 100).toFixed(0)}%`,
+                  minWidth:
+                    mastery || 0 > 0 && mastery || 0* 100 < 10 ? "2rem" : undefined,
+                }}
               >
                 {Math.round((mastery || 0) * 100)}%
               </div>
